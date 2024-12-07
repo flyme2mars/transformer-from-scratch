@@ -32,4 +32,24 @@ class PositionalEncoding(nn.Module):
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
 
-        pe = pe.unsqueeze(0)
+        pe = pe.unsqueeze(0)  # (1, seq_len, d_model)
+
+        self.register_buffer("pe", pe)
+
+    def forward(self, x):
+        x = x + (self.pe[:, : x.shape[1], :]).requires_grad_(False)
+        return self.dropout(x)
+
+
+class LayerNormalization(nn.Module):
+
+    def __init__(self, eps: float = 1e-6) -> None:
+        super().__init__()
+        self.eps = eps
+        self.alpha = nn.Parameter(torch.ones(1))
+        self.bias = nn.Parameter(torch.ones(1))
+
+    def forward(self, x: torch.Tensor):
+        mean = x.mean(dim=-1, keepdim=True)
+        std = x.std(dim=-1, keepdim=True)
+        return self.alpha * (x - mean) / (std + self.eps) + self.bias
