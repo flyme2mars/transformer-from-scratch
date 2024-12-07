@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import math
 
 
 class InputEmbedding(nn.Module):
@@ -21,5 +22,14 @@ class PositionalEncoding(nn.Module):
         self.seq_len = seq_len
         self.dropout = nn.Dropout(dropout)
 
-        pe = torch.zeros(seq_len, d_model)
-        position = torch.arange(0, seq_len, dtype=torch.float).unsqueeze(1)
+        pe = torch.zeros(seq_len, d_model)  # (seq_len, d_model)
+        position = torch.arange(0, seq_len, dtype=torch.float).unsqueeze(
+            1
+        )  # (seq_len, 1)
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
+        )
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+
+        pe = pe.unsqueeze(0)
