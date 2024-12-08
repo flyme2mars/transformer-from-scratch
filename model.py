@@ -53,3 +53,15 @@ class LayerNormalization(nn.Module):
         mean = x.mean(dim=-1, keepdim=True)
         std = x.std(dim=-1, keepdim=True)
         return self.alpha * (x - mean) / (std + self.eps) + self.bias
+
+
+class FeedForwardBlock(nn.Module):
+    def __init__(self, d_model: int, d_ff: int, dropout: float) -> None:
+        super().__init__()
+
+        self.linear_1 = nn.Linear(in_features=d_model, out_features=d_ff)
+        self.dropout = nn.Dropout(dropout)
+        self.linear_2 = nn.Linear(in_features=d_ff, out_features=d_model)
+
+    def forward(self, x):
+        pass
